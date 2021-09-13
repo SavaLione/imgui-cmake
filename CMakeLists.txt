@@ -50,7 +50,11 @@ set(IMGUI_SRC
     src/imgui_widgets.cpp
 )
 
-add_library(${IMGUI_PROJECT} STATIC ${IMGUI_SRC})
+if(IMGUI_BUILD_STATIC)
+    add_library(${IMGUI_PROJECT} STATIC ${IMGUI_SRC})
+else()
+    add_library(${IMGUI_PROJECT} SHARED ${IMGUI_SRC})
+endif()
 target_include_directories(${IMGUI_PROJECT} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 #################################################################################
@@ -63,7 +67,9 @@ if (IMGUI_BUILD_BACKEND_OPENGL3)
     project(imgui_opengl3)
     set(IMGUI_BACKEND_OPENGL3_SRC src/backends/imgui_impl_opengl3.cpp)
     # OpenGL
-    find_package(OpenGL REQUIRED)
+    if (NOT TARGET glfw)
+        find_package(OpenGL REQUIRED)
+    endif()
     # imgui opengl3
     if(IMGUI_BUILD_STATIC)
 	    add_library(imgui_opengl3 STATIC ${IMGUI_BACKEND_OPENGL3_SRC})
@@ -96,7 +102,7 @@ if (IMGUI_BUILD_BACKEND_GLFW)
     else()
 	    add_library(imgui_glfw SHARED ${IMGUI_BACKEND_GLFW_SRC})
     endif()
-    target_link_libraries(imgui_glfw imgui imgui_opengl3 glfw)
+    target_link_libraries(imgui_glfw imgui glfw)
     target_include_directories(imgui_glfw PUBLIC ${PROJECT_SOURCE_DIR}/include/backends)
     target_include_directories(imgui_glfw PUBLIC ${GLFW_INCLUDE_DIR})
 endif()
